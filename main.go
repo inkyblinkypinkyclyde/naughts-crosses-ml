@@ -9,20 +9,41 @@ import (
 
 var grid = [10]string{"", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
+type GameTurn struct {
+	turn     int
+	position int
+	player   string
+}
+
+var turn int = 0
+
+var gameTurns = []GameTurn{}
+
 func main() {
+
 	for {
 		showGrid()
-		playerTurn()
+		playerTurn("x")
+		// computerTurn("x")
 		if winCheck("x") == "x" {
 			fmt.Println("You win!")
 			break
 		}
-		computerTurn()
+		if staleMateCHeck() {
+			fmt.Println("Stalemate!")
+			break
+		}
+		computerTurn("o")
 		if winCheck("o") == "o" {
 			fmt.Println("You lose!")
 			break
 		}
+		if staleMateCHeck() {
+			fmt.Println("Stalemate!")
+			break
+		}
 	}
+	fmt.Println(gameTurns)
 }
 
 func showGrid() {
@@ -35,21 +56,25 @@ func showGrid() {
 
 func rng() int {
 	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(8) + 1
+	return rand.Intn(9) + 1
 }
 
-func computerTurn() {
+func computerTurn(ox string) {
+	turn++
+	fmt.Println("Computer turn number ", turn)
 	for {
 		c := rng()
 		if grid[c] != "x" && grid[c] != "o" {
-			grid[c] = "o"
+			grid[c] = ox
 			// fmt.Println("Computer chose: ", c)
+			gameTurns = append(gameTurns, GameTurn{turn, c, ox})
 			break
 		}
 	}
 }
 
-func playerTurn() {
+func playerTurn(ox string) {
+	turn++
 	for {
 		fmt.Println("Enter a selection")
 		var c string
@@ -60,7 +85,8 @@ func playerTurn() {
 			break
 		}
 		if i > 0 && i < 10 {
-			grid[i] = "x"
+			grid[i] = ox
+			gameTurns = append(gameTurns, GameTurn{turn, i, ox})
 			break
 		}
 		fmt.Println("Invalid selection")
@@ -93,4 +119,11 @@ func winCheck(p string) string {
 		return p
 	}
 	return ""
+}
+
+func staleMateCHeck() bool {
+	if turn == 9 {
+		return true
+	}
+	return false
 }
