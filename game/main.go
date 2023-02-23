@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+	// _ "github.com/lib/pq"
 )
 
 var grid = [10]string{"", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
@@ -20,7 +21,7 @@ var turn int = 0
 var gameTurns = []GameTurn{}
 
 func main() {
-
+	generateTable()
 	for {
 		showGrid()
 		playerTurn("x")
