@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -9,47 +10,46 @@ import (
 
 var grid = [10]string{}
 
-// var grid = [10]string{"", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+type SessionOptions struct {
+	mode  string
+	loops int
+	table string
+}
 
 var gameTurnsStrings = make([]string, 10)
 var turn int
 
 func main() {
-	db := generateTable("random")
-	for i := 0; i < 850; i++ {
+	sessionOptions := getSessionOptions()
+
+	db := generateTable(sessionOptions.table)
+	for i := 0; i < sessionOptions.loops; i++ {
 		fmt.Println("Starting game #" + strconv.Itoa(i))
 		resetGame()
 		for {
-			// showGrid()
-			// playerTurn("x")
-			computerTurn("x")
+			if sessionOptions.mode == "h" {
+				showGrid()
+				playerTurn("x")
+			} else {
+				computerTurn("x")
+			}
 			if winCheck("x") == "x" {
 				fmt.Println("You win!")
-				gameTurnsStrings[9] = "x"
-				dumpGameTurns("random", gameTurnsStrings, db)
-				fmt.Println(gameTurnsStrings)
+				endGame("x", sessionOptions.table, db)
 				break
 			}
 			if staleMateCHeck() {
 				fmt.Println("Stalemate!")
-				gameTurnsStrings[9] = "s"
-				dumpGameTurns("random", gameTurnsStrings, db)
-				fmt.Println(gameTurnsStrings)
+				endGame("s", sessionOptions.table, db)
 				break
 			}
 			computerTurn("o")
 			if winCheck("o") == "o" {
-				fmt.Println("You lose!")
-				gameTurnsStrings[9] = "o"
-				dumpGameTurns("random", gameTurnsStrings, db)
-				fmt.Println(gameTurnsStrings)
+				endGame("o", sessionOptions.table, db)
 				break
 			}
 			if staleMateCHeck() {
-				fmt.Println("Stalemate!")
-				gameTurnsStrings[9] = "s"
-				dumpGameTurns("random", gameTurnsStrings, db)
-				fmt.Println(gameTurnsStrings)
+				endGame("s", sessionOptions.table, db)
 				break
 			}
 		}
@@ -156,4 +156,29 @@ func resetGame() {
 	for i, _ := range gameTurnsStrings {
 		gameTurnsStrings[i] = ""
 	}
+}
+
+func endGame(player string, table string, db *sql.DB) {
+	gameTurnsStrings[9] = player
+	dumpGameTurns(table, gameTurnsStrings, db)
+	fmt.Println(gameTurnsStrings)
+	resetGame()
+}
+
+func getSessionOptions() SessionOptions {
+	var mode string
+	fmt.Println("Play (h)uman against computer or (c)omputer against computer?")
+	fmt.Scanln(&mode)
+	numberOfLoops := "1"
+	var table string
+	if mode == "c" {
+		fmt.Println("Enter number of loops:")
+		fmt.Scanln(&numberOfLoops)
+		table = "random"
+	} else {
+		table = "human"
+	}
+	numberOfLoopsInt, _ := strconv.Atoi(numberOfLoops)
+	newSessionOptions := SessionOptions{mode, numberOfLoopsInt, table}
+	return newSessionOptions
 }
