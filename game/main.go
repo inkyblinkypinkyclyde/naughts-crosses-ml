@@ -5,46 +5,56 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
-	// _ "github.com/lib/pq"
 )
 
-var grid = [10]string{"", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
+var grid = [10]string{}
 
-type GameTurn struct {
-	turn     int
-	position int
-	player   string
-}
+// var grid = [10]string{"", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
-var turn int = 0
-
-var gameTurns = []GameTurn{}
+var gameTurnsStrings = make([]string, 10)
+var turn int
 
 func main() {
-	generateTable()
-	for {
-		showGrid()
-		playerTurn("x")
-		// computerTurn("x")
-		if winCheck("x") == "x" {
-			fmt.Println("You win!")
-			break
-		}
-		if staleMateCHeck() {
-			fmt.Println("Stalemate!")
-			break
-		}
-		computerTurn("o")
-		if winCheck("o") == "o" {
-			fmt.Println("You lose!")
-			break
-		}
-		if staleMateCHeck() {
-			fmt.Println("Stalemate!")
-			break
+	db := generateTable("random")
+	for i := 0; i < 850; i++ {
+		fmt.Println("Starting game #" + strconv.Itoa(i))
+		resetGame()
+		for {
+			// showGrid()
+			// playerTurn("x")
+			computerTurn("x")
+			if winCheck("x") == "x" {
+				fmt.Println("You win!")
+				gameTurnsStrings[9] = "x"
+				dumpGameTurns("random", gameTurnsStrings, db)
+				fmt.Println(gameTurnsStrings)
+				break
+			}
+			if staleMateCHeck() {
+				fmt.Println("Stalemate!")
+				gameTurnsStrings[9] = "s"
+				dumpGameTurns("random", gameTurnsStrings, db)
+				fmt.Println(gameTurnsStrings)
+				break
+			}
+			computerTurn("o")
+			if winCheck("o") == "o" {
+				fmt.Println("You lose!")
+				gameTurnsStrings[9] = "o"
+				dumpGameTurns("random", gameTurnsStrings, db)
+				fmt.Println(gameTurnsStrings)
+				break
+			}
+			if staleMateCHeck() {
+				fmt.Println("Stalemate!")
+				gameTurnsStrings[9] = "s"
+				dumpGameTurns("random", gameTurnsStrings, db)
+				fmt.Println(gameTurnsStrings)
+				break
+			}
 		}
 	}
-	fmt.Println(gameTurns)
+
 }
 
 func showGrid() {
@@ -61,21 +71,26 @@ func rng() int {
 }
 
 func computerTurn(ox string) {
-	turn++
-	fmt.Println("Computer turn number ", turn)
+	// fmt.Println("Computer turn number ", turn)
 	for {
 		c := rng()
 		if grid[c] != "x" && grid[c] != "o" {
 			grid[c] = ox
 			// fmt.Println("Computer chose: ", c)
-			gameTurns = append(gameTurns, GameTurn{turn, c, ox})
+			var newReportString string
+			if turn == 0 {
+				newReportString = gameTurnsStrings[turn] + ox + strconv.Itoa(c)
+			} else {
+				newReportString = gameTurnsStrings[turn-1] + ox + strconv.Itoa(c)
+			}
+			gameTurnsStrings[turn] = newReportString
 			break
 		}
 	}
+	turn++
 }
 
 func playerTurn(ox string) {
-	turn++
 	for {
 		fmt.Println("Enter a selection")
 		var c string
@@ -87,11 +102,11 @@ func playerTurn(ox string) {
 		}
 		if i > 0 && i < 10 {
 			grid[i] = ox
-			gameTurns = append(gameTurns, GameTurn{turn, i, ox})
 			break
 		}
 		fmt.Println("Invalid selection")
 	}
+	turn++
 }
 
 func winCheck(p string) string {
@@ -122,9 +137,23 @@ func winCheck(p string) string {
 	return ""
 }
 
-func staleMateCHeck() bool {
-	if turn == 9 {
-		return true
+func staleMateCHeck() bool { //returns true if turn is 9
+	return turn == 9
+}
+
+func resetGame() {
+	// Reset turns
+	turn = 0
+	// Reset Grid
+	for i, _ := range grid {
+		if i == 0 {
+			grid[i] = ""
+		} else {
+			grid[i] = strconv.Itoa(i)
+		}
 	}
-	return false
+	// Reset Game turns strings
+	for i, _ := range gameTurnsStrings {
+		gameTurnsStrings[i] = ""
+	}
 }
