@@ -90,7 +90,7 @@ func computerTurn(ox string) {
 	turn++
 }
 
-func playerTurn(ox string) {
+func playerTurn(ox string) { // this does not generate a new report string so it's not being processed correctly into pg
 	for {
 		fmt.Println("Enter a selection")
 		var c string

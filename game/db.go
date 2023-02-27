@@ -7,7 +7,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var connStr = "postgresql://localhost/naughts_and_crosses?user=postgres&password=postgres&sslmode=disable&port=5434" // Our connection string
+var connStr = "postgresql://" + dbip + "/naughts_and_crosses?user=postgres&password=postgres&sslmode=disable&port=5434" // Our connection string
 
 func generateTable(tableName string) *sql.DB {
 	db, err := sql.Open("postgres", connStr)
