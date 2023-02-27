@@ -100,8 +100,19 @@ func playerTurn(ox string) { // this does not generate a new report string so it
 			fmt.Println("Invalid selection")
 			break
 		}
+		if grid[i] == "x" || grid[i] == "o" {
+			fmt.Println("That has already been chosen, pick again")
+			break
+		}
 		if i > 0 && i < 10 {
 			grid[i] = ox
+			var newReportString string
+			if turn == 0 {
+				newReportString = gameTurnsStrings[turn] + ox + c
+			} else {
+				newReportString = gameTurnsStrings[turn-1] + ox + c
+			}
+			gameTurnsStrings[turn] = newReportString
 			break
 		}
 		fmt.Println("Invalid selection")
